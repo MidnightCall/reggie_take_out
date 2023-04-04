@@ -9,6 +9,11 @@ spring:
       url: jdbc:mysql://kojikoji:3306/reggie?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true
       username: root
       password: tv20020203
+  redis:
+    host: kojikoji
+    port: 6379
+    password: tv20020203
+    database: 0
   main:
     banner-mode: off
 mybatis-plus:
