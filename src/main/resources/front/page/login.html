@@ -59,14 +59,21 @@
             mounted(){},
             methods:{
                 getCode(){
-                    this.form.code = ''
-                    const regex = /^(13[0-9]{9})|(15[0-9]{9})|(17[0-9]{9})|(18[0-9]{9})|(19[0-9]{9})$/;
-                    if (regex.test(this.form.phone)) {
-                        this.msgFlag = false
-                        this.form.code = (Math.random()*1000000).toFixed(0)
-                    }else{
-                        this.msgFlag = true
-                    }
+                    // this.form.code = ''
+                    // const regex = /^(13[0-9]{9})|(15[0-9]{9})|(17[0-9]{9})|(18[0-9]{9})|(19[0-9]{9})$/;
+                    // if (regex.test(this.form.phone)) {
+                    //     this.msgFlag = false
+                    //     this.form.code = (Math.random()*1000000).toFixed(0)
+                    // }else{
+                    //     this.msgFlag = true
+                    // }
+                    axios.post("/user/sendMsg", this.form).then((res)=>{
+                        if(res.data.code == 1){
+                            this.$message.success("验证码已发送");
+                        }else{
+                            this.$message.err("验证码未发送");
+                        }
+                    })
                 },
                 async btnLogin(){
                     if(this.form.phone && this.form.code){

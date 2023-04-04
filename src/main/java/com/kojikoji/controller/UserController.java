@@ -7,6 +7,7 @@ import com.kojikoji.service.UserService;
 import com.kojikoji.utils.ValidateCodeUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,6 +17,7 @@ import javax.jws.soap.SOAPBinding;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @ClassName UserController
@@ -31,13 +33,19 @@ import java.util.Map;
 public class UserController {
     @Autowired
     private UserService userService;
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     @PostMapping("/sendMsg")
-    public R<String> login(@RequestBody User user, HttpSession session){
-        String phone = user.getPhone();
+    public R<String> sendMsg(@RequestBody Map map, HttpSession session){
+        log.info("接收到了信息{}", map);
+        String phone = (String) map.get("phone");
         if(null != phone){
             String code = ValidateCodeUtils.generateValidateCode(4).toString();
-            session.setAttribute(phone, code);
+//            session.setAttribute(phone, code);
+            // 在session中保存验证码，设置有效时间为5分钟
+            System.out.println("验证码为:" + code + "，5分钟内有效");
+            redisTemplate.opsForValue().set(phone, code, 5, TimeUnit.MINUTES);
             return R.success("手机验证码发送成功");
         }
 
@@ -54,6 +62,8 @@ public class UserController {
         String code = "1234";
         // 获取正确验证码
 //        String sessionCode = session.getAttribute(phone).toString();
+        // 从redis中获取验证码
+        String redisCode = (String) redisTemplate.opsForValue().get(phone);
         String sessionCode = "1234";
         // 比对验证码是否正确
         if(code != null && code.equals(sessionCode)){
@@ -69,6 +79,8 @@ public class UserController {
                 userService.save(user);
             }
             session.setAttribute("user", user.getId());
+            // 登陆成功后，在redis中删除验证码
+            redisTemplate.delete(phone);
             return R.success(user);
         }
 
