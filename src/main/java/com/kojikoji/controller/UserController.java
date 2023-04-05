@@ -57,16 +57,15 @@ public class UserController {
         log.info(map.toString());
         // 获取手机号
         String phone = map.get("phone").toString();
-        // 获取验证码(用session中的code替代)
-//        String code = session.getAttribute(phone).toString();
-        String code = "1234";
+        // 获取输入的验证码
+        String code = map.get("code").toString();
         // 获取正确验证码
 //        String sessionCode = session.getAttribute(phone).toString();
-        // 从redis中获取验证码
+        // 从redis中获取正确的验证码
         String redisCode = (String) redisTemplate.opsForValue().get(phone);
-        String sessionCode = "1234";
+//        String sessionCode = "1234";
         // 比对验证码是否正确
-        if(code != null && code.equals(sessionCode)){
+        if(code != null && code.equals(redisCode)){
             // 比对成功，判断当前用户是否为新用户，新用户则完成注册
             LambdaQueryWrapper<User> lqw = new LambdaQueryWrapper<>();
             lqw.eq(User::getPhone, phone);
