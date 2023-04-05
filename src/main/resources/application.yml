@@ -14,6 +14,9 @@ spring:
     port: 6379
     password: tv20020203
     database: 0
+  cache:
+    redis:
+      time-to-live: 1800000
   main:
     banner-mode: off
 mybatis-plus:
